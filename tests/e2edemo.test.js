@@ -7,29 +7,17 @@ const TEST_DATA = {
     password: process.env.password,
     couponCode: process.env.couponCode,
     targetCountry: process.env.targetCountry,
-    cvv: process.env.cvv
+    cvv: process.env.cvv,
+    BASE_URL: process.env.BASE_URL
 };
 async function waitForMillseconds(time) {
     await new Promise((resolve) => setTimeout(resolve, Number(time)));
 }
 
-
-const BASE_URL = "https://rahulshettyacademy.com/client/#/auth/login";
-
-/**
- * E2E Test: Complete Purchase Flow
- * This test covers the full user journey from login to checkout:
- * 1. User Authentication
- * 2. Adding product to cart
- * 3. Cart verification
- * 4. Applying coupon code
- * 5. Filling shipping details
- * 6. Order submission
- */
 test("e2e demo - Complete Purchase Flow", async ({ page }) => {
 
     // ========== STEP 1: User Authentication ==========
-    await page.goto(`${BASE_URL}`);
+    await page.goto(`${TEST_DATA.BASE_URL}`);
     await page.locator("#userEmail").fill(TEST_DATA.email);
     await page.locator("#userPassword").fill(TEST_DATA.password);
     await page.locator("#login").click();
@@ -90,19 +78,16 @@ test("e2e demo - Complete Purchase Flow", async ({ page }) => {
     console.log("✅ Order submitted successfully!");
 });
 
-test.only("e2e demo - Verify Order History", async ({ page }) => {
+test("e2e demo - Verify Order History", async ({ page }) => {
 
-    await page.goto(`${BASE_URL}`);
+    await page.goto(`${TEST_DATA.BASE_URL}`);
     await page.locator("#userEmail").fill(TEST_DATA.email);
     await page.locator("#userPassword").fill(TEST_DATA.password);
     await page.locator("#login").click();
-
     await page.locator(".btn.btn-custom").nth(1).click();
-    await waitForMillseconds(500);
-    
+    await page.locator("tbody").waitFor();
     const TotalOrderNumber = await page.locator("tbody tr").count();
     const orderId1 = "69ad6847415d779f9b627f79"
-    await waitForMillseconds(1500);
 
     for (let i = 0; i < TotalOrderNumber; i++) {
 
@@ -113,8 +98,70 @@ test.only("e2e demo - Verify Order History", async ({ page }) => {
             await row.locator(".btn.btn-primary").click();
             const fetchOrderId = await page.locator(".col-text.-main").textContent();
             expect(fetchOrderId).toEqual(orderId1)
-             console.info(`Order ID ${orderId1} found at index ${i}`);
+            console.info(`Order ID ${orderId1} found at index ${i}`);
             break;
         }
     }
+});
+
+test("e2e demo - Verify Order History with optimization", async ({ page }) => {
+
+    await page.goto(`${TEST_DATA.BASE_URL}`);
+    await page.getByPlaceholder("email@example.com").fill(TEST_DATA.email);
+    await page.getByPlaceholder("enter your passsword").fill(TEST_DATA.password);
+    await page.getByRole('button', { name: 'Login'}).click()
+    
+    await page.getByRole('button', { name: 'ORDERS'}).click()
+    await page.locator("tbody").waitFor();
+    const TotalOrderNumber = await page.locator("tbody tr").count();
+    await page.getByText('69ad6847415d779f9b627f79').click()
+
+    for (let i = 0; i < TotalOrderNumber; i++) {
+
+        const matchId = (await page.locator("tbody tr").nth(i).textContent()).match(/^[a-f0-9]+/)[0];
+        if (orderId1 === matchId) {
+            console.info(`Order ID ${orderId1} found at index ${i}`);
+            const row = await page.locator("tbody tr").nth(2);
+            await row.locator(".btn.btn-primary").click();
+            const fetchOrderId = await page.locator(".col-text.-main").textContent();
+            expect(fetchOrderId).toEqual(orderId1)
+            console.info(`Order ID ${orderId1} found at index ${i}`);
+            break;
+        }
+    }
+});
+test("label and radio", async ({ page }) => {
+    await page.goto('https://rahulshettyacademy.com/angularpractice/');
+    await page.getByLabel("Check me out if you Love IceCreams!").click();
+    await waitForMillseconds(1500);
+    await page.getByLabel("Gender").selectOption("Female");
+    await waitForMillseconds(1500);
+    await page.getByLabel("Student").click();
+    await page.locator("//input[@type='date']").fill('2001-02-05');
+    await waitForMillseconds(1500);
+});
+
+test.only("calendar automate", async ({ page }) => {
+    const month = 3
+    const date = 5
+    const year = '2024'
+    await page.goto(TEST_DATA.BASE_URL);
+    await page.locator('//input[@name="month"]').click();
+    await page.locator('//button[@class="react-calendar__navigation__label"]').click();
+    await waitForMillseconds(2000);
+
+    // month selection
+    await page.locator('//button[@class="react-calendar__tile react-calendar__year-view__months__month"]').nth(month-1).click();
+
+    // date selection
+    await page.locator('//button[@class="react-calendar__tile react-calendar__month-view__days__day"]').nth(date-1).click();
+    await waitForMillseconds(3500);
+    
+    // year selection
+    await page.locator('//button[@class="react-calendar__navigation__label"]').click();
+    await waitForMillseconds(3500);
+    await page.locator('//button[@class="react-calendar__navigation__label"]').click();
+    await waitForMillseconds(3500);
+    await page.getByRole('button', {name: '2021'}).click()
+    await waitForMillseconds(3500);
 });
