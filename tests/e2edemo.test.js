@@ -8,7 +8,7 @@ const TEST_DATA = {
     couponCode: process.env.couponCode,
     targetCountry: process.env.targetCountry,
     cvv: process.env.cvv,
-    BASE_URL: process.env.BASE_URL
+    BASE_URL: process.env.BASE_URL,
 };
 async function waitForMillseconds(time) {
     await new Promise((resolve) => setTimeout(resolve, Number(time)));
@@ -142,8 +142,8 @@ test("label and radio", async ({ page }) => {
 });
 
 test.only("calendar automate", async ({ page }) => {
-    const month = 3
-    const date = 5
+    const month = 2
+    const date = 21
     const year = '2024'
     await page.goto(TEST_DATA.BASE_URL);
     await page.locator('//input[@name="month"]').click();
@@ -151,10 +151,10 @@ test.only("calendar automate", async ({ page }) => {
     await waitForMillseconds(2000);
 
     // month selection
-    await page.locator('//button[@class="react-calendar__tile react-calendar__year-view__months__month"]').nth(month-1).click();
+    await page.locator('//button[@class="react-calendar__tile react-calendar__year-view__months__month"]').nth(month-2).click();
 
     // date selection
-    await page.locator('//button[@class="react-calendar__tile react-calendar__month-view__days__day"]').nth(date-1).click();
+    await page.locator(`//abbr[text()="${date}"]`).click();
     await waitForMillseconds(3500);
     
     // year selection
@@ -162,6 +162,6 @@ test.only("calendar automate", async ({ page }) => {
     await waitForMillseconds(3500);
     await page.locator('//button[@class="react-calendar__navigation__label"]').click();
     await waitForMillseconds(3500);
-    await page.getByRole('button', {name: '2021'}).click()
+    await page.getByRole('button', {name: `${year}`}).click()
     await waitForMillseconds(3500);
 });
