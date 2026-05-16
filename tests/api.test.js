@@ -1,5 +1,4 @@
-
-// import { test, expect } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 const { expect } = require("@playwright/test");
 const { request } = require("http");
@@ -17,16 +16,6 @@ test('employee list API should return employees', async ({ request }) => {
   expect(employees[0]).toHaveProperty('id');
   expect(employees[0]).toHaveProperty('email');
 });
-
-
-
-
-// test("test ending", async ({page})=>{
-
-//     await page.goto()
-
-
-// });
 
 
 test("Get users", async ({ request, baseURL }) => {
